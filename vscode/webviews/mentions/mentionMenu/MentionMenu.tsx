@@ -157,10 +157,7 @@ export const MentionMenu: FunctionComponent<
             }
 
             // HACK: The OpenCtx interface do not support building multi-step selection for mentions.
-            // For the remote file search provider, we first need the user to search for the repo from the list and then
-            // put in the query to search for files. Below we are doing a hack to not set the repo item as a mention
-            // but instead keep the same provider selected and put the full repo name in the query. The provider will then
-            // return files instead of repos if the repo name is in the query.
+            // For the remote file s
             if (item.provider === 'openctx') {
                 const openCtxItem = item as ContextItemOpenCtx
                 if (
