@@ -339,6 +339,13 @@ export class TestClient extends MessageHandler {
             return result
         })
         this.registerRequest('textDocument/openUntitledDocument', params => {
+<<<<<<< Updated upstream
+=======
+            logDebug('#4581: textDocument/openUntitledDocument', JSON.stringify({
+                params,
+            }))
+            console.log("test1")
+>>>>>>> Stashed changes
             this.workspace.loadDocument(ProtocolTextDocumentWithUri.fromDocument(params))
             this.notify('textDocument/didOpen', params)
             return Promise.resolve(true)

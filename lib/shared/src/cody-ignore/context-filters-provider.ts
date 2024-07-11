@@ -33,6 +33,7 @@ export type IsIgnored =
     | 'non-file-uri'
     | 'no-repo-found'
     | `repo:${string}`
+    | 'invalid-uri'
 
 export type GetRepoNamesFromWorkspaceUri = (uri: vscode.Uri) => Promise<string[] | null>
 type RepoName = string
@@ -146,6 +147,11 @@ export class ContextFiltersProvider implements vscode.Disposable {
     }
 
     public async isUriIgnored(uri: vscode.Uri): Promise<IsIgnored> {
+        if (uri === null) {
+            logError('ContextFiltersProvider', 'isUriIgnored', 'Received null URI')
+            return 'invalid-uri'
+        }
+        
         if (
             allowedSchemes.has(uri.scheme) ||
             (this.lastContextFiltersResponse === null && graphqlClient.isDotCom()) ||
@@ -153,6 +159,7 @@ export class ContextFiltersProvider implements vscode.Disposable {
         ) {
             return false
         }
+
         if (this.hasIgnoreEverythingFilters()) {
             return 'has-ignore-everything-filters'
         }
