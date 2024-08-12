@@ -5,6 +5,8 @@ import type { FixupControlApplicator } from '../../vscode/src/non-stop/strategie
 import { type Agent, errorToCodyError } from './agent'
 import type { EditTask } from './protocol-alias'
 import * as vscode from 'vscode'
+import { TextEdit, ReplaceTextEdit, InsertTextEdit, DeleteTextEdit } from './protocol-alias' 
+import { Edit } from '../../vscode/src/non-stop/line-diff'
 
 export class AgentFixupControls implements FixupControlApplicator {
     constructor(
@@ -15,28 +17,40 @@ export class AgentFixupControls implements FixupControlApplicator {
     public acceptAll(id: FixupTaskID): void {
         const task = this.fixups.taskForId(id)
         if (task) {
+            console.warn("JM: calling fixups.acceptAll")
             this.fixups.acceptAll(task)
+        } else {
+            console.warn("JM: task not found for id", id)
         }
     }
 
     public accept(id: FixupTaskID, range: vscode.Range): void {
         const task = this.fixups.taskForId(id)
         if (task) {
+            console.warn("JM: calling fixups.accept for range", range)
             this.fixups.accept(task, range)
+        } else {
+            console.warn("JM: task not found for id", id)
         }
     }
 
     public reject(id: FixupTaskID, range: vscode.Range ): void {
         const task = this.fixups.taskForId(id)
         if (task) {
+            console.warn("JM: calling fixups.reject for range", range)
             this.fixups.reject(task, range)
+        } else {
+            console.warn("JM: task not found for id", id)
         }
     }
 
     public undo(id: FixupTaskID): void {
         const task = this.fixups.taskForId(id)
         if (task) {
+            console.warn("JM: calling fixups.undo")
             this.fixups.undo(task)
+        } else {
+            console.warn("JM: task not found for id", id)
         }
     }
 
@@ -44,6 +58,8 @@ export class AgentFixupControls implements FixupControlApplicator {
         const task = this.fixups.taskForId(id)
         if (task) {
             this.fixups.cancel(task)
+        } else {
+            console.warn("JM: task not found for id", id)
         }
     }
 
@@ -61,6 +77,13 @@ export class AgentFixupControls implements FixupControlApplicator {
     dispose() {}
 
     public static serialize(task: FixupTask): EditTask {
+<<<<<<< HEAD
+=======
+        console.warn("JM: In serialize")
+
+        const textEdits: TextEdit[] = task.diff?.map(edit => convertEditToTextEdit(edit)) || []
+
+>>>>>>> ed836acaa... current
         return {
             id: task.id,
             state: task.state,
@@ -70,3 +93,30 @@ export class AgentFixupControls implements FixupControlApplicator {
         }
     }
 }
+<<<<<<< HEAD
+=======
+
+function convertEditToTextEdit(edit: Edit): TextEdit {
+    switch (edit.type) {
+        case 'insertion':
+            return {
+                type: 'insert',
+                position: edit.range.start,
+                value: edit.text,
+            } as InsertTextEdit
+        case 'deletion':
+            return {
+                type: 'delete',
+                range: edit.range,
+            } as DeleteTextEdit
+        case 'decoratedReplacement':
+            return {
+                type: 'replace',
+                range: edit.range,
+                value: edit.text,
+            } as ReplaceTextEdit
+        default:
+            throw new Error(`Unknown edit type: ${(edit as any).type}`)
+    }
+}
+>>>>>>> ed836acaa... current
