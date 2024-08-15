@@ -1,9 +1,10 @@
 import type * as vscode from 'vscode'
 
 import type { EventSource } from '@sourcegraph/cody-shared'
+import type { QuickPickInput } from '../edit/input/get-input'
 import type { FixupFile } from './FixupFile'
 import type { FixupTask, FixupTaskID } from './FixupTask'
-import type { CodyTaskState } from './utils'
+import type { CodyTaskState } from './state'
 
 // Role interfaces so that sub-objects of the FixupController can consume a
 // narrow part of the controller.
@@ -13,7 +14,7 @@ import type { CodyTaskState } from './utils'
  */
 export interface FixupActor {
     /**
-     * Mark a task as accepted and stop tracking the task. Only applicable to
+     * Mark all changes in a task as accepted and stop tracking the task. Only applicable to
      * tasks in the "applied" state. Sets the task state to "finished" and
      * discards the task.
      */
@@ -34,6 +35,18 @@ export interface FixupActor {
     reject(task: FixupTask, range: vscode.Range): Promise<void>
 
     /**
+     * Mark an individual part of a diff within a task as accepted.
+     * Only applicable to tasks in the "applied" state.
+     */
+    acceptChange(task: FixupTask, range: vscode.Range): Promise<void>
+
+    /**
+     * Mark an individual part of a diff within a task as rejected.
+     * Only applicable to tasks in the "applied" state.
+     */
+    rejectChange(task: FixupTask, range: vscode.Range): Promise<void>
+
+    /**
      * Undo a task's edits and stop tracking the task. Only applicable to
      * tasks in the "applied" state. If the undo succeeds, the task state is
      * set to "finished" and the task is discarded.
@@ -51,8 +64,13 @@ export interface FixupActor {
      * a new task to try again. Only applicable to tasks in the "applied" state.
      * @param task the task to retry.
      * @param source the source of the retry, for event logging.
+     * @param previousInput the previous input, if any.
      */
-    retry(task: FixupTask, source: EventSource): Promise<FixupTask | undefined>
+    retry(
+        task: FixupTask,
+        source: EventSource,
+        previousInput?: QuickPickInput
+    ): Promise<FixupTask | undefined>
 }
 
 /**

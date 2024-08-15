@@ -20,7 +20,7 @@ import {
 import type { ExtensionMessage, ExtensionTranscriptMessage } from '../../vscode/src/chat/protocol'
 import { doesFileExist } from '../../vscode/src/commands/utils/workspace-files'
 import { ProtocolTextDocumentWithUri } from '../../vscode/src/jsonrpc/TextDocumentWithUri'
-import { CodyTaskState } from '../../vscode/src/non-stop/utils'
+import { CodyTaskState } from '../../vscode/src/non-stop/state'
 import {
     TESTING_CREDENTIALS,
     type TestingCredentials,
@@ -102,7 +102,7 @@ export function buildAgentBinary(): void {
     // To see the full error, run this file in isolation:
     //
     //   pnpm test agent/src/index.test.ts
-    execSync('pnpm run build:agent', {
+    execSync('pnpm run build:for-tests ', {
         cwd: getAgentDir(),
         stdio: 'inherit',
     })
@@ -256,6 +256,7 @@ export class TestClient extends MessageHandler {
         })
         this.registerNotification('codeLenses/display', async params => {
             this.codeLenses.set(params.uri, params.codeLenses)
+            this.codeLensUpdate.fire(params.codeLenses)
         })
 
         this.registerRequest('workspace/edit', async params => {
@@ -339,9 +340,9 @@ export class TestClient extends MessageHandler {
             return result
         })
         this.registerRequest('textDocument/openUntitledDocument', params => {
-            this.workspace.loadDocument(ProtocolTextDocumentWithUri.fromDocument(params))
+            const doc = this.workspace.loadDocument(ProtocolTextDocumentWithUri.fromDocument(params))
             this.notify('textDocument/didOpen', params)
-            return Promise.resolve(true)
+            return Promise.resolve(doc.protocolDocument.underlying)
         })
         this.registerRequest('textDocument/edit', async params => {
             this.textDocumentEditParams.push(params)
@@ -579,6 +580,28 @@ export class TestClient extends MessageHandler {
         return `ID_${freshID}`
     }
 
+    public acceptLensWasShown(uri: Uri): Promise<void> {
+        const lenses = this.codeLenses.get(uri.toString()) ?? []
+        if (lenses.find(l => l.command?.command === 'cody.fixup.codelens.accept')) {
+            return Promise.resolve()
+        }
+
+        let disposables: vscode.Disposable[]
+        return new Promise<void>((resolve, reject) => {
+            disposables = [
+                this.onCodeLensUpdate(codeLenses => {
+                    if (codeLenses.find(l => l.command?.command === 'cody.fixup.codelens.accept')) {
+                        return resolve()
+                    }
+                }),
+            ]
+        }).finally(() => {
+            for (const disposable of disposables) {
+                disposable.dispose()
+            }
+        })
+    }
+
     /**
      * Promise that resolves when the provided task has reached the 'applied' state.
      */
@@ -641,6 +664,8 @@ export class TestClient extends MessageHandler {
     }
 
     public codeLenses = new Map<string, ProtocolCodeLens[]>()
+    public codeLensUpdate = new vscode.EventEmitter<ProtocolCodeLens[]>()
+    public onCodeLensUpdate = this.codeLensUpdate.event
     public taskUpdate = new vscode.EventEmitter<EditTask>()
     public onDidUpdateTask = this.taskUpdate.event
     public taskDelete = new vscode.EventEmitter<EditTask>()

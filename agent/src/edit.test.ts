@@ -59,7 +59,7 @@ describe('Edit', () => {
         })
         await client.taskHasReachedAppliedPhase(task)
         const lenses = client.codeLenses.get(uri.toString()) ?? []
-        expect(lenses).toHaveLength(0)
+        expect(lenses).toHaveLength(2)
         await client.request('editTask/accept', {
             id: task.id,
             range: new vscode.Range(
@@ -178,10 +178,10 @@ describe('Edit', () => {
           }
 
           export const Heading: React.FC<HeadingProps> = ({ text, level = 1 }) => {
-              const HeadingTag = \`h\${level}\` as keyof JSX.IntrinsicElements
+              const HeadingTag = \`h\${level}\` as keyof JSX.IntrinsicElements;
 
-              return <HeadingTag>{text}</HeadingTag>
-          }
+              return <HeadingTag>{text}</HeadingTag>;
+          };
 
           "
         `,
