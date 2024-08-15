@@ -39,15 +39,16 @@ export class AgentFixupControls implements FixupControlApplicator {
         if (task) {
             console.warn("JM: calling fixups.reject for range", range)
             this.fixups.reject(task, range)
+            // this.didUpdateTask(task); 
         } else {
             console.warn("JM: task not found for id", id)
         }
     }
 
-    public undo(id: FixupTaskID): void {
+    public rejectAll(id: FixupTaskID): void {
         const task = this.fixups.taskForId(id)
         if (task) {
-            console.warn("JM: calling fixups.undo")
+            console.warn("JM: calling fixups.rejectAll")
             this.fixups.undo(task)
         } else {
             console.warn("JM: task not found for id", id)
@@ -77,24 +78,23 @@ export class AgentFixupControls implements FixupControlApplicator {
     dispose() {}
 
     public static serialize(task: FixupTask): EditTask {
-<<<<<<< HEAD
-=======
         console.warn("JM: In serialize")
 
         const textEdits: TextEdit[] = task.diff?.map(edit => convertEditToTextEdit(edit)) || []
 
->>>>>>> ed836acaa... current
         return {
             id: task.id,
             state: task.state,
             error: errorToCodyError(task.error),
             selectionRange: task.selectionRange,
             instruction: task.instruction?.toString().trim(),
+            edits: textEdits,
+            model: task.model.toString().trim(),
+            originalText: task.original,
         }
     }
 }
-<<<<<<< HEAD
-=======
+
 
 function convertEditToTextEdit(edit: Edit): TextEdit {
     switch (edit.type) {
@@ -119,4 +119,3 @@ function convertEditToTextEdit(edit: Edit): TextEdit {
             throw new Error(`Unknown edit type: ${(edit as any).type}`)
     }
 }
->>>>>>> ed836acaa... current
