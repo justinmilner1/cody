@@ -7,6 +7,7 @@ import type {
     EventSource,
     PromptString,
 } from '@sourcegraph/cody-shared'
+import {  logError } from '@sourcegraph/cody-shared'
 
 import type { FixupTask, FixupTaskID, FixupTelemetryMetadata } from '../non-stop/FixupTask'
 import type { EditIntent, EditMode } from './types'

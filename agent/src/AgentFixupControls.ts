@@ -42,16 +42,15 @@ export class AgentFixupControls extends FixupCodeLenses {
         if (task) {
             console.warn("JM: calling fixups.reject for range", range)
             this.fixups.reject(task, range)
-            // this.didUpdateTask(task); 
         } else {
             console.warn("JM: task not found for id", id)
         }
     }
 
-    public rejectAll(id: FixupTaskID): void {
+    public undo(id: FixupTaskID): void {
         const task = this.fixups.taskForId(id)
         if (task) {
-            console.warn("JM: calling fixups.rejectAll")
+            console.warn("JM: calling fixups.undo")
             this.fixups.undo(task)
         } else {
             console.warn("JM: task not found for id", id)
@@ -93,6 +92,7 @@ export class AgentFixupControls extends FixupCodeLenses {
     dispose() {}
 
     public static serialize(task: FixupTask): EditTask {
+        console.warn("JM: In serialize")
 
         const textEdits: TextEdit[] = task.diff?.map(edit => convertEditToTextEdit(edit)) || []
 

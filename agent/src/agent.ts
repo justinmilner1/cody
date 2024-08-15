@@ -1074,14 +1074,13 @@ export class Agent extends MessageHandler implements ExtensionClient {
             if (!id || !range) {
                 throw new Error('editTask/reject: missing required parameters')
             }
-            console.warn("reject id: ", id, " range: ", range)
             this.fixups?.reject(id, range)
             return null
         })
 
-        this.registerAuthenticatedRequest('editTask/rejectAll', async ({ id }) => {
-            console.warn('JM: editTask/rejectAll called w id:', id)
-            this.fixups?.rejectAll(id)
+        this.registerAuthenticatedRequest('editTask/undo', async ({ id }) => {
+            console.warn('JM: editTask/undo called: ', params)
+            this.fixups?.undo(id)
             return null
         })
 
