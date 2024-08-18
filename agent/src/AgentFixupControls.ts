@@ -67,10 +67,10 @@ export class AgentFixupControls extends FixupCodeLenses {
         }
     }
 
-    public retry(id: FixupTaskID, previousInput: QuickPickInput): Promise<FixupTask | undefined> {
+    public retry(id: FixupTaskID): Promise<FixupTask | undefined> {
         const task = this.fixups.taskForId(id)
         if (task) {
-            return this.fixups.retry(task, 'code-lens', previousInput)
+            return this.fixups.retry(task, 'code-lens')
         }
         return Promise.resolve(undefined)
     }
